@@ -77,7 +77,7 @@ def plot_density_map_cp():
     plt.imshow(data_map_smoothed,origin='lower',cmap='jet',aspect='auto',extent=(RAmin,RAmax,DECmin,DECmax))
     plt.xlabel(r'$\alpha_{J2000}$')
     plt.ylabel(r'$\delta_{J2000}$')
-    plt.colorbar(label='$N_{gal}$')
+    plt.colorbar(label=r'$\rho$')
     
     w = np.where(crit_type==0)
     X = RAmin + crit_pos[1,w] * (RAmax-RAmin)/data_map_smoothed.shape[0]
@@ -91,7 +91,7 @@ def plot_density_map_cp():
 
 if __name__=='__main__':
     plot_density_map_cp()
-    #plot_mask()
+    #plot_mask(mask)
     
     
     

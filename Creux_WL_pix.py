@@ -45,11 +45,20 @@ def plot_density_map():
     plt.show()
 
 ### mask
+# density map
 w = np.where(data_map==0)
 mask = np.zeros((RA_Nbins, DEC_Nbins))
 mask[w] = 1
-#fits.writeto('mask.fits',mask)
-def plot_mask():
+#fits.writeto('mask.fits',mask.flatten())
+# dtfe map
+data_map = fits.getdata('dtfe_map_z_0.3_0.5_512x512.fits')
+w = np.where(data_map==0)
+mask = np.zeros((data_map.shape[0], data_map.shape[1]))
+mask[w] = 1
+flat_mask = mask.flatten()
+#fits.writeto('dtfe_map_z_0.3_0.5_512x512_mask.fits',flat_mask)
+
+def plot_mask(mask):
     plt.figure()
     plt.imshow(mask.T,origin='lower',cmap='binary',extent=(RAmin,RAmax,DECmin,DECmax),aspect='auto')
     plt.xlabel(r'$\alpha_{J2000}$')
@@ -57,30 +66,33 @@ def plot_mask():
     plt.colorbar(label='$N_{gal}$')
     plt.show()
 
-
 ### critical points
-pers = 0.5
-f = np.load("density_map_adims_sourceMinDownSkl_"+str(pers)+".npz")
-crit_pos = f["crit_pos"]
-crit_type = f["crit_type"]
+pers = 1
+f = np.load('dtfe_map_z_0.3_0.5_512x512_adims3_sourceMinDownSklMasked_'+str(pers)+'.npz') #'density_map_adims_sourceMinDownSkl_'+str(pers)+'.npz'
+crit_pos = f['crit_pos']
+crit_type = f['crit_type']
 def plot_density_map_cp():
     plt.figure()
-    data_map_smoothed = smoothed_field = gaussian_filter(data_map,sigma=1)
-    plt.imshow(data_map_smoothed.T,origin='lower',cmap='jet',aspect='auto',extent=(RAmin,RAmax,DECmin,DECmax))
+    data_map_smoothed = gaussian_filter(data_map,sigma=3)
+    plt.imshow(data_map_smoothed,origin='lower',cmap='jet',aspect='auto',extent=(RAmin,RAmax,DECmin,DECmax))
     plt.xlabel(r'$\alpha_{J2000}$')
     plt.ylabel(r'$\delta_{J2000}$')
     plt.colorbar(label='$N_{gal}$')
     
     w = np.where(crit_type==0)
-    X = RAmin + crit_pos[1,w] * (RAmax-RAmin)/RA_Nbins
-    Y = DECmin + crit_pos[0,w] * (DECmax-DECmin)/DEC_Nbins
-    plt.scatter(X,Y,marker="*",color="k")
+    X = RAmin + crit_pos[1,w] * (RAmax-RAmin)/data_map_smoothed.shape[0]
+    Y = DECmin + crit_pos[0,w] * (DECmax-DECmin)/data_map_smoothed.shape[1]
+    plt.scatter(X,Y,marker='*',color='k')
+    #plt.scatter(crit_pos[1,w],crit_pos[0,w],marker="*",color="k")
     
-    plt.title("pers="+str(pers))
+    plt.title('pers='+str(pers))
     plt.show()
 
 
-if __name__=="__main__":
+if __name__=='__main__':
     plot_density_map_cp()
     #plot_mask()
     
+    
+    
+    print()

@@ -19,8 +19,8 @@ def slice_data(lower, upper, plot = False): #bins : 0.3-0.5, 0.7-0.9
     if plot:
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        scat = ax.scatter(binned_data['ALPHA_J2000'], binned_data['DELTA_J2000'], s = 0.3, c = r)
-        plt.colorbar(scat, label = '$z$')
+        scat = ax.scatter(binned_data['ALPHA_J2000'], binned_data['DELTA_J2000'], s = 0.3, c = 'r')
+        #plt.colorbar(scat, label = '$z$')
         ax.set_xlabel(r'$\alpha_{J2000}$(°)')
         ax.set_ylabel(r'$\delta_{J2000}$(°)')
         ax.set_title(f'Galaxy distribution between z = {lower} and z = {upper}')

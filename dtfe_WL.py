@@ -7,6 +7,8 @@ from itertools import repeat
 from multiprocessing import Pool
 from scipy.interpolate import griddata
 from astropy.cosmology import Planck15
+from scipy.ndimage import gaussian_filter as gaussf
+from matplotlib.colors import LogNorm
 
 def how_many(tri,num_points):
     there_are=np.where(tri.simplices==num_points)[0]
@@ -84,15 +86,58 @@ def map_dtfe3d(x,y,z,size):
     return grid
 
 def map_dtfe2d(x,y,size):
+    print('First line')
     tab=np.vstack((x,y)).T
+    print('Second line')
     tri=Delaunay(tab)
+    print('Third line')
     the_pool=Pool()
+    print('Fourth line')
     areas=get_areas(tri,the_pool)
+    print('Fifth line')
     d=densities2d(tri,the_pool,areas)
+    print('Sixth line')
     the_pool.close()
+    print('Seventh line')
     x_m=np.linspace(np.min(x),np.max(x),size)
+    print('Eighth line')
     y_m=np.linspace(np.min(y),np.max(y),size)
+    print('Ninth line')
     x_m,y_m=np.meshgrid(x_m,y_m)
+    print('Tenth line')
     grid=griddata(tab,d,(x_m,y_m),method='linear')
+    print('Eleventh line')
     grid[np.isnan(grid)]=0
+    print('Twelfth line')
     return grid
+
+def make_dtfemap(lower, upper, size):
+    binned_data = creux.slice_data(lower, upper)
+    
+    ra = binned_data['ALPHA_J2000']
+    dec = binned_data['DELTA_J2000']
+    
+    print('Just before making the map')
+    dtfe_map = map_dtfe2d(ra, dec, size)
+    print('I just did the map !')
+    np.save(f'../dtfe_map_z_{lower}_{upper}_{size}x{size}.npy', dtfe_map)
+
+def plot_dtfemap(lower, upper, size, smooth = 0, vmin = None, vmax = None, norm = None):
+    
+    binned_data = creux.slice_data(lower, upper)
+    ra = binned_data['ALPHA_J2000']
+    dec = binned_data['DELTA_J2000']
+    corners = [np.linspace(np.min(ra), np.max(ra), size), np.linspace(np.min(dec), np.max(dec), size)]
+    
+    dtfe_map = np.load(f'../dtfe_map_z_{lower}_{upper}_{size}x{size}.npy')
+    dtfe_map = gaussf(dtfe_map, smooth)
+    print(np.min(dtfe_map), np.max(dtfe_map), np.mean(dtfe_map))
+    fig = plt.figure(figsize = (15,15))
+    ax = fig.add_subplot(111)
+    field = ax.pcolormesh(corners[0], corners[1], dtfe_map, vmin = vmin, vmax = vmax, norm = norm, cmap = 'seismic')
+    plt.colorbar(field, label = 'DTFE density')
+    ax.set_title(f'DTFE map of the galaxy density field between z = {lower}, z = {upper}')
+    ax.set_xlabel(r'$\alpha_{J2000}$(°)')
+    ax.set_ylabel(r'$\delta_{J2000}$(°)')
+    plt.savefig(f'../dtfe_map_z_{lower}_{upper}_{size}x{size}.png')
+    plt.show()

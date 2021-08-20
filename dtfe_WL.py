@@ -9,6 +9,7 @@ from scipy.interpolate import griddata
 from astropy.cosmology import Planck15
 from scipy.ndimage import gaussian_filter as gaussf
 from matplotlib.colors import LogNorm
+from astropy.io import fits
 
 def how_many(tri,num_points):
     there_are=np.where(tri.simplices==num_points)[0]
@@ -131,6 +132,7 @@ def plot_dtfemap(lower, upper, size, smooth = 0, vmin = None, vmax = None, norm 
     
     dtfe_map = np.load(f'../dtfe_map_z_{lower}_{upper}_{size}x{size}.npy')
     dtfe_map = gaussf(dtfe_map, smooth)
+    fits.writeto(f'../dtfe_map_z_{lower}_{upper}_{size}x{size}.fits', data = dtfe_map)
     print(np.min(dtfe_map), np.max(dtfe_map), np.mean(dtfe_map))
     fig = plt.figure(figsize = (15,15))
     ax = fig.add_subplot(111)

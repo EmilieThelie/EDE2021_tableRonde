@@ -34,7 +34,7 @@ RA_Nbins, DEC_Nbins = 80, 150
 lower_z, higher_z = 0.3, 0.5
 data_in_z_bin = cleaned_data[(cleaned_data['Z_B'] > lower_z) & (cleaned_data['Z_B'] < higher_z)]
 data_map, edges = np.histogramdd((data_in_z_bin['ALPHA_J2000'],data_in_z_bin['DELTA_J2000']),bins=(RA_Nbins,DEC_Nbins))
-fits.writeto('density_map.fits',data_map)
+#fits.writeto('density_map.fits',data_map)
 def plot_density_map():
     plt.figure()
     plt.imshow(data_map.T,origin='lower',cmap='jet',extent=(RAmin,RAmax,DECmin,DECmax),aspect='auto')
@@ -42,6 +42,12 @@ def plot_density_map():
     plt.ylabel(r'$\delta_{J2000}$')
     plt.colorbar(label='$N_{gal}$')
     plt.show()
+
+### mask
+w = np.where(data_map==0)
+mask = np.zeros((RA_Nbins, DEC_Nbins))
+mask[w] = 1
+fits.writeto('mask.fits',mask)
 
 
 if __name__=="__main__":

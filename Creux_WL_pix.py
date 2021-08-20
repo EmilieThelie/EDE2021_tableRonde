@@ -59,20 +59,22 @@ def plot_mask():
 
 
 ### critical points
-pers = 1
+pers = 0.5
 f = np.load("density_map_adims_sourceMinDownSkl_"+str(pers)+".npz")
 crit_pos = f["crit_pos"]
 crit_type = f["crit_type"]
 def plot_density_map_cp():
     plt.figure()
     data_map_smoothed = smoothed_field = gaussian_filter(data_map,sigma=1)
-    plt.imshow(data_map_smoothed.T,origin='lower',cmap='jet',aspect='auto')#,extent=(RAmin,RAmax,DECmin,DECmax),aspect='auto')
+    plt.imshow(data_map_smoothed.T,origin='lower',cmap='jet',aspect='auto',extent=(RAmin,RAmax,DECmin,DECmax))
     plt.xlabel(r'$\alpha_{J2000}$')
     plt.ylabel(r'$\delta_{J2000}$')
     plt.colorbar(label='$N_{gal}$')
     
     w = np.where(crit_type==0)
-    plt.scatter(crit_pos[1,w],crit_pos[0,w],marker="*",color="k")
+    X = RAmin + crit_pos[1,w] * (RAmax-RAmin)/RA_Nbins
+    Y = DECmin + crit_pos[0,w] * (DECmax-DECmin)/DEC_Nbins
+    plt.scatter(X,Y,marker="*",color="k")
     
     plt.title("pers="+str(pers))
     plt.show()
